@@ -1,7 +1,7 @@
 import { useState, useRef, Suspense, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF } from '@react-three/drei';
-import { Box3, Material, Object3D, Mesh } from 'three';
+import { Box3, Material, Object3D, Mesh, MeshStandardMaterial } from 'three';
 import Footer from './Footer';
 
 interface ModelMetadata {
@@ -46,22 +46,24 @@ function Model({ url, onLoad }: { url: string; onLoad: (info: ModelMetadata) => 
         if (Array.isArray(mesh.material)) {
           mesh.material.forEach(material => {
             materials.add(material);
+            const standardMaterial = material as MeshStandardMaterial;
             materialDetails.push({
-              name: material.name || 'Unnamed Material',
-              color: material.color ? `#${material.color.getHexString()}` : undefined,
-              roughness: material.roughness,
-              metalness: material.metalness,
-              map: !!material.map
+              name: standardMaterial.name || 'Unnamed Material',
+              color: standardMaterial.color ? `#${standardMaterial.color.getHexString()}` : undefined,
+              roughness: standardMaterial.roughness,
+              metalness: standardMaterial.metalness,
+              map: !!standardMaterial.map
             });
           });
         } else {
           materials.add(mesh.material);
+          const standardMaterial = mesh.material as MeshStandardMaterial;
           materialDetails.push({
-            name: mesh.material.name || 'Unnamed Material',
-            color: mesh.material.color ? `#${mesh.material.color.getHexString()}` : undefined,
-            roughness: mesh.material.roughness,
-            metalness: mesh.material.metalness,
-            map: !!mesh.material.map
+            name: standardMaterial.name || 'Unnamed Material',
+            color: standardMaterial.color ? `#${standardMaterial.color.getHexString()}` : undefined,
+            roughness: standardMaterial.roughness,
+            metalness: standardMaterial.metalness,
+            map: !!standardMaterial.map
           });
         }
       }
