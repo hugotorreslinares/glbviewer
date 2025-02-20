@@ -1,0 +1,10 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Front face -->
+  <path d="M8 12L16 16V24L8 20V12Z" fill="#4A90E2"/>
+  <!-- Right face -->
+  <path d="M16 16L24 12V20L16 24V16Z" fill="#357ABD"/>
+  <!-- Top face -->
+  <path d="M8 12L16 8L24 12L16 16L8 12Z" fill="#64A6E8"/>
+  <!-- Outline -->
+  <path d="M8 12L16 8L24 12L16 16L8 12Z M8 12V20L16 24V16L8 12Z M16 16V24L24 20V12L16 16Z" stroke="#2C3E50" stroke-width="1" fill="none"/>
+</svg>

@@ -138,7 +138,10 @@ export default function ModelViewer() {
   return (
     <div style={{ width: '100%', height: '100vh', display: 'flex', flexDirection: 'column', background: 'white' }}>
       <div style={{ padding: '20px', background: '#f5f5f5', borderBottom: '1px solid #ddd' }}>
-        <h1 style={{ margin: '0 0 10px 0', color: '#333' }}>GLB Viewer</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
+          <img src="/logo.svg" alt="GLB Viewer Logo" style={{ width: '32px', height: '32px' }} />
+          <h1 style={{ margin: '0', color: '#333' }}>GLB Viewer</h1>
+        </div>
         <p style={{ margin: '0 0 15px 0', color: '#555' }}>
           Upload a GLB file to view your 3D model. You can rotate, zoom, and pan the model using your mouse.
         </p>
