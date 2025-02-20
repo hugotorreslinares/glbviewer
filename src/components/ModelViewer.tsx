@@ -1,8 +1,11 @@
-import { useState, useRef, Suspense, useEffect } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import { Box3, Material, Object3D, Mesh, MeshStandardMaterial } from "three";
 import Footer from "./Footer";
+import Sidebar from "./Sidebar";
+import Header from "./Header";
+import styles from "./ModelViewer.module.css";
 
 interface ModelMetadata {
   materials: number;
@@ -111,7 +114,7 @@ export default function ModelViewer() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isModelInfoExpanded, setIsModelInfoExpanded] = useState(true);
   const [showBookmarkPopover, setShowBookmarkPopover] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const hasSeenPopover = localStorage.getItem('hasSeenBookmarkPopover');
@@ -167,412 +170,177 @@ export default function ModelViewer() {
   }, [modelUrl]);
 
   return (
-    <div style={{ width: "100%", height: "100vh", display: "flex", flexDirection: "column", background: "white", overflow: "auto", position: "relative" }}>
+    <div className={styles["model-viewer"]}>
       {showBookmarkPopover && (
-        <div style={{
-          position: "fixed",
-          top: "20px",
-          right: "20px",
-          backgroundColor: "#2196f3",
-          color: "white",
-          padding: "15px",
-          borderRadius: "8px",
-          boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-          zIndex: 1000,
-          maxWidth: "300px",
-          animation: "slideIn 0.3s ease-out",
-        }}>
-          <div style={{ marginBottom: "10px", fontSize: "16px" }}>
+        <div className={styles["model-viewer__bookmark-popover"]}>
+          <div className={styles["model-viewer__bookmark-popover-title"]}>
             📌 Like GLB Viewer? Add it to your bookmarks for quick access!
           </div>
-          <div style={{ fontSize: "14px", marginBottom: "15px" }}>
+          <div className={styles["model-viewer__bookmark-popover-text"]}>
             Press {navigator.platform.toLowerCase().includes('mac') ? '⌘+D' : 'Ctrl+D'} to bookmark this page
           </div>
           <button
             onClick={handleDismissPopover}
-            style={{
-              backgroundColor: "transparent",
-              border: "1px solid white",
-              color: "white",
-              padding: "8px 12px",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontSize: "14px",
-              width: "100%",
-            }}
+            className={styles["model-viewer__bookmark-popover-button"]}
           >
             Got it!
           </button>
-          <style>
-            {`
-              @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-              }
-            `}
-          </style>
         </div>
       )}
-      <div
-        style={{
-          padding: "15px",
-          background: "#f5f5f5",
-          borderBottom: "1px solid #ddd",
-        }}
-      >
-        {" "}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            marginBottom: "12px",
-            flexWrap: "wrap",
-          }}
-        >
-          {" "}
-          <img
-            src="/logo.svg"
-            alt="GLB Viewer Logo"
-            style={{ width: "28px", height: "28px" }}
-          />{" "}
-          <h1
-            style={{
-              margin: "0",
-              color: "#333",
-              fontSize: "clamp(1.5rem, 4vw, 2rem)",
-            }}
-          >
-            GLB Viewer
-          </h1>{" "}
-        </div>{" "}
-        <p
-          style={{
-            margin: "0 0 12px 0",
-            color: "#555",
-            fontSize: "clamp(0.875rem, 2.5vw, 1rem)",
-          }}
-        >
-          {" "}
-          Upload a GLB file to view your 3D model. You can rotate, zoom, and pan
-          using touch gestures or mouse controls.{" "}
-        </p>{" "}
-        <p
-          style={{
-            margin: "0 0 12px 0",
-            color: "#666",
-            backgroundColor: "#e8f5e9",
-            padding: "10px",
-            borderRadius: "4px",
-            border: "1px solid #c8e6c9",
-            fontSize: "clamp(0.875rem, 2.5vw, 1rem)",
-          }}
-        >
-          {" "}
-          <strong>🔒 Privacy Notice:</strong> Your 3D model files are processed
-          entirely in your browser and are not stored or transmitted anywhere.{" "}
-        </p>{" "}
-        <label
-          htmlFor="file-upload"
-          style={{
-            display: "block",
-            padding: "12px",
-            backgroundColor: "#2196f3",
-            color: "white",
-            borderRadius: "4px",
-            cursor: "pointer",
-            textAlign: "center",
-            marginBottom: "10px",
-            fontSize: "clamp(0.875rem, 2.5vw, 1rem)",
-            touchAction: "manipulation",
-          }}
-        >
-          {" "}
-          Choose GLB File{" "}
-        </label>{" "}
-        <input
-          id="file-upload"
-          type="file"
-          accept=".glb"
-          onChange={handleFileUpload}
-          ref={inputRef}
-          style={{ display: "none" }}
-        />{" "}
-      </div>{" "}
-      <div style={{ flex: 1, minHeight: "50vh", touchAction: "none" }}>
-        {" "}
+      <Header onFileUpload={handleFileUpload} />
+      <div className={styles["model-viewer__canvas-container"]}>
         <Canvas camera={{ position: [0, 0, 5] }}>
-          {" "}
-          <ambientLight intensity={0.5} />{" "}
-          <directionalLight position={[10, 10, 5]} intensity={1} />{" "}
+          <ambientLight intensity={0.5} />
+          <directionalLight position={[10, 10, 5]} intensity={1} />
           <Suspense fallback={null}>
-            {" "}
-            {modelUrl && <Model url={modelUrl} onLoad={handleModelLoad} />}{" "}
-          </Suspense>{" "}
+            {modelUrl && <Model url={modelUrl} onLoad={handleModelLoad} />}
+          </Suspense>
           <OrbitControls
             enableDamping
             dampingFactor={0.05}
             rotateSpeed={0.5}
             zoomSpeed={0.5}
             panSpeed={0.5}
-          />{" "}
-        </Canvas>{" "}
-      </div>{" "}
+          />
+        </Canvas>
+      </div>
       {metadata && (
-        <div
-          style={{
-            padding: "15px",
-            background: "#f5f5f5",
-            borderTop: "1px solid #ddd",
-          }}
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          title="Model Details"
         >
-          {" "}
-          <div
-            onClick={() => setIsModelInfoExpanded(!isModelInfoExpanded)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              cursor: "pointer",
-              userSelect: "none",
-              marginBottom: isModelInfoExpanded ? "12px" : "0",
-              padding: "8px",
-              backgroundColor: "#fff",
-              borderRadius: "4px",
-              touchAction: "manipulation",
-            }}
-          >
-            {" "}
-            <h2
-              style={{
-                margin: "0",
-                color: "#333",
-                fontSize: "clamp(1rem, 3vw, 1.2rem)",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
-              {" "}
-              <span
-                style={{
-                  display: "inline-block",
-                  transform: `rotate(${
-                    isModelInfoExpanded ? "90deg" : "0deg"
-                  })`,
-                  transition: "transform 0.3s ease",
-                }}
-              >
-                ▶
-              </span>{" "}
-              Model Information{" "}
-            </h2>{" "}
-          </div>{" "}
-          <div
-            style={{
-              maxHeight: isModelInfoExpanded ? "1000px" : "0",
-              overflow: "hidden",
-              transition: "max-height 0.3s ease-in-out",
-            }}
-          >
-            {" "}
+          <div className={styles["model-viewer__info-section"]}>
             <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-                gap: "12px",
-                color: "#555",
-                fontSize: "clamp(0.875rem, 2.5vw, 1rem)",
-              }}
+              onClick={() => setIsModelInfoExpanded(!isModelInfoExpanded)}
+              className={styles["model-viewer__collapsible-header"]}
             >
-              {" "}
-              <div
-                style={{
-                  padding: "8px",
-                  backgroundColor: "#fff",
-                  borderRadius: "4px",
-                }}
-              >
-                {" "}
-                <strong>File Name:</strong> {metadata.fileName}{" "}
-              </div>{" "}
-              <div
-                style={{
-                  padding: "8px",
-                  backgroundColor: "#fff",
-                  borderRadius: "4px",
-                }}
-              >
-                {" "}
-                <strong>File Size:</strong> {metadata.fileSize}{" "}
-              </div>{" "}
-              <div
-                style={{
-                  padding: "8px",
-                  backgroundColor: "#fff",
-                  borderRadius: "4px",
-                }}
-              >
-                {" "}
-                <strong>Last Modified:</strong> {metadata.lastModified}{" "}
-              </div>{" "}
-              <div
-                style={{
-                  padding: "8px",
-                  backgroundColor: "#fff",
-                  borderRadius: "4px",
-                }}
-              >
-                {" "}
-                <strong>Materials:</strong>{" "}
-                {metadata.materialCount || "Loading..."}{" "}
-              </div>{" "}
-              <div
-                style={{
-                  padding: "8px",
-                  backgroundColor: "#fff",
-                  borderRadius: "4px",
-                }}
-              >
-                {" "}
-                <strong>Vertices:</strong>{" "}
-                {metadata.vertexCount || "Loading..."}{" "}
-              </div>{" "}
-              <div
-                style={{
-                  padding: "8px",
-                  backgroundColor: "#fff",
-                  borderRadius: "4px",
-                }}
-              >
-                {" "}
-                <strong>Dimensions:</strong>{" "}
-                {metadata.dimensions || "Loading..."}{" "}
-              </div>{" "}
-            </div>{" "}
-          </div>{" "}
-          {metadata.materialDetails && metadata.materialDetails.length > 0 && (
-            <div style={{ marginTop: "15px" }}>
-              {" "}
-              <div
-                onClick={() => setIsExpanded(!isExpanded)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  cursor: "pointer",
-                  userSelect: "none",
-                  marginBottom: isExpanded ? "12px" : "0",
-                  padding: "8px",
-                  backgroundColor: "#fff",
-                  borderRadius: "4px",
-                  touchAction: "manipulation",
-                }}
-              >
-                {" "}
-                <h3
-                  style={{
-                    margin: "0",
-                    color: "#333",
-                    fontSize: "clamp(0.9rem, 2.8vw, 1.1rem)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                  }}
+              <h2 className={`${styles["model-viewer__collapsible-title"]} ${styles["model-viewer__collapsible-title--primary"]}`}>
+                <span
+                  className={`${styles["model-viewer__collapsible-arrow"]} ${isModelInfoExpanded ? styles["model-viewer__collapsible-arrow--expanded"] : ""}`}
                 >
-                  {" "}
-                  <span
-                    style={{
-                      display: "inline-block",
-                      transform: `rotate(${isExpanded ? "90deg" : "0deg"})`,
-                      transition: "transform 0.3s ease",
-                    }}
-                  >
-                    ▶
-                  </span>{" "}
-                  Material Details{" "}
-                </h3>{" "}
-              </div>{" "}
-              <div
-                style={{
-                  maxHeight: isExpanded ? "1000px" : "0",
-                  overflow: "hidden",
-                  transition: "max-height 0.3s ease-in-out",
-                }}
-              >
-                {" "}
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                    gap: "12px",
-                  }}
-                >
-                  {" "}
-                  {metadata.materialDetails.map((material, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        padding: "12px",
-                        backgroundColor: "#fff",
-                        borderRadius: "4px",
-                        border: "1px solid #ddd",
-                        color: "#555",
-                        fontSize: "clamp(0.875rem, 2.5vw, 1rem)",
-                      }}
-                    >
-                      {" "}
-                      <div>
-                        <strong>Name:</strong> {material.name}
-                      </div>{" "}
-                      {material.color && (
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "5px",
-                            flexWrap: "wrap",
-                          }}
-                        >
-                          {" "}
-                          <strong>Color:</strong>{" "}
-                          <div
-                            style={{
-                              width: "24px",
-                              height: "24px",
-                              backgroundColor: material.color,
-                              border: "1px solid #ddd",
-                              borderRadius: "4px",
-                            }}
-                          />{" "}
-                          {material.color}{" "}
-                        </div>
-                      )}{" "}
-                      {material.roughness !== undefined && (
-                        <div>
-                          <strong>Roughness:</strong>{" "}
-                          {material.roughness.toFixed(2)}
-                        </div>
-                      )}{" "}
-                      {material.metalness !== undefined && (
-                        <div>
-                          <strong>Metalness:</strong>{" "}
-                          {material.metalness.toFixed(2)}
-                        </div>
-                      )}{" "}
-                      {material.map !== undefined && (
-                        <div>
-                          <strong>Texture Map:</strong>{" "}
-                          {material.map ? "Yes" : "No"}
-                        </div>
-                      )}{" "}
-                    </div>
-                  ))}{" "}
-                </div>{" "}
-              </div>{" "}
+                  ▶
+                </span>
+                Model Information
+              </h2>
             </div>
-          )}{" "}
-        </div>
-      )}{" "}
-      <Footer />{" "}
+            <br/>
+            <div
+              className={styles["model-viewer__collapsible-content"]}
+              style={{ maxHeight: isModelInfoExpanded ? "1000px" : "0" }}
+            >
+              <div className={styles["model-viewer__info-grid"]}>
+                <div className={styles["model-viewer__info-item"]}>
+                  <strong>File Name:</strong> {metadata.fileName}
+                </div>
+                <div className={styles["model-viewer__info-item"]}>
+                  <strong>File Size:</strong> {metadata.fileSize}
+                </div>
+                <div className={styles["model-viewer__info-item"]}>
+                  <strong>Last Modified:</strong> {metadata.lastModified}
+                </div>
+                <div className={styles["model-viewer__info-item"]}>
+                  <strong>Materials:</strong>
+                  {metadata.materialCount || "Loading..."}
+                </div>
+                <div className={styles["model-viewer__info-item"]}>
+                  <strong>Vertices:</strong>
+                  {metadata.vertexCount || "Loading..."}
+                </div>
+                <div className={styles["model-viewer__info-item"]}>
+                  <strong>Dimensions:</strong>
+                  {metadata.dimensions || "Loading..."}
+                </div>
+              </div>
+            </div>
+            {metadata.materialDetails && metadata.materialDetails.length > 0 && (
+              <div style={{ marginTop: "15px" }}>
+                <div
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className={styles["model-viewer__collapsible-header"]}
+                >
+                  <h3 className={`${styles["model-viewer__collapsible-title"]} ${styles["model-viewer__collapsible-title--secondary"]}`}>
+                    <span
+                      className={`${styles["model-viewer__collapsible-arrow"]} ${isExpanded ? styles["model-viewer__collapsible-arrow--expanded"] : ""}`}
+                    >
+                      ▶
+                    </span>
+                    Material Details
+                  </h3>
+                </div>
+                <div
+                  className={styles["model-viewer__collapsible-content"]}
+                  style={{ maxHeight: isExpanded ? "1000px" : "0" }}
+                >
+                  <div className={styles["model-viewer__material-grid"]}>
+                    {metadata.materialDetails.map((material, index) => (
+                      <div
+                        key={index}
+                        className={styles["model-viewer__material-item"]}
+                      >
+                        <div>
+                          <strong>Name:</strong> {material.name}
+                        </div>
+                        {material.color && (
+                          <div className={styles["model-viewer__material-color"]}>
+                            <strong>Color:</strong>
+                            <div
+                              className={styles["model-viewer__material-color-preview"]}
+                              style={{ backgroundColor: material.color }}
+                            />
+                            {material.color}
+                          </div>
+                        )}
+                        {material.roughness !== undefined && (
+                          <div>
+                            <strong>Roughness:</strong>{" "}
+                            {material.roughness.toFixed(2)}
+                          </div>
+                        )}
+                        {material.metalness !== undefined && (
+                          <div>
+                            <strong>Metalness:</strong>{" "}
+                            {material.metalness.toFixed(2)}
+                          </div>
+                        )}
+                        {material.map !== undefined && (
+                          <div>
+                            <strong>Texture Map:</strong>{" "}
+                            {material.map ? "Yes" : "No"}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </Sidebar>
+      )}
+      <button
+        onClick={() => setIsSidebarOpen(true)}
+        className={styles["model-viewer__info-button"]}
+        style={{ display: metadata && !isSidebarOpen ? "block" : "none" }}
+        aria-label="Show model information"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+      </button>
+      <Footer />
     </div>
   );
 }
