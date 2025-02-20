@@ -110,7 +110,20 @@ export default function ModelViewer() {
   const [metadata, setMetadata] = useState<ModelInfo | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isModelInfoExpanded, setIsModelInfoExpanded] = useState(true);
+  const [showBookmarkPopover, setShowBookmarkPopover] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const hasSeenPopover = localStorage.getItem('hasSeenBookmarkPopover');
+    if (!hasSeenPopover && modelUrl) {
+      setTimeout(() => setShowBookmarkPopover(true), 2000);
+    }
+  }, [modelUrl]);
+
+  const handleDismissPopover = () => {
+    setShowBookmarkPopover(false);
+    localStorage.setItem('hasSeenBookmarkPopover', 'true');
+  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -154,17 +167,52 @@ export default function ModelViewer() {
   }, [modelUrl]);
 
   return (
-    <div
-      style={{
-        width: "100%",
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        background: "white",
-        overflow: "auto",
-      }}
-    >
-      {" "}
+    <div style={{ width: "100%", height: "100vh", display: "flex", flexDirection: "column", background: "white", overflow: "auto", position: "relative" }}>
+      {showBookmarkPopover && (
+        <div style={{
+          position: "fixed",
+          top: "20px",
+          right: "20px",
+          backgroundColor: "#2196f3",
+          color: "white",
+          padding: "15px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+          zIndex: 1000,
+          maxWidth: "300px",
+          animation: "slideIn 0.3s ease-out",
+        }}>
+          <div style={{ marginBottom: "10px", fontSize: "16px" }}>
+            📌 Like GLB Viewer? Add it to your bookmarks for quick access!
+          </div>
+          <div style={{ fontSize: "14px", marginBottom: "15px" }}>
+            Press {navigator.platform.toLowerCase().includes('mac') ? '⌘+D' : 'Ctrl+D'} to bookmark this page
+          </div>
+          <button
+            onClick={handleDismissPopover}
+            style={{
+              backgroundColor: "transparent",
+              border: "1px solid white",
+              color: "white",
+              padding: "8px 12px",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "14px",
+              width: "100%",
+            }}
+          >
+            Got it!
+          </button>
+          <style>
+            {`
+              @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+              }
+            `}
+          </style>
+        </div>
+      )}
       <div
         style={{
           padding: "15px",
